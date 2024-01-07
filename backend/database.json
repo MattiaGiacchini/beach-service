@@ -1,0 +1,96 @@
+{
+  "rooms": [
+    {
+      "id": 1,
+      "type": "Single"
+    },
+    {
+      "id": 2,
+      "type": "Double"
+    },
+    {
+      "id": 3,
+      "type": "Triple"
+    }
+  ],
+  "prices": [
+    {
+      "id": 1,
+      "room_type": "Single",
+      "check_in": "2024-01-10",
+      "check_out": "2024-01-17",
+      "daily_price": 100
+    },
+    {
+      "id": 2,
+      "room_type": "Double",
+      "check_in": "2024-01-10",
+      "check_out": "2024-01-17",
+      "daily_price": 150
+    },
+    {
+      "id": 3,
+      "room_type": "Triple",
+      "check_in": "2024-01-10",
+      "check_out": "2024-01-17",
+      "daily_price": 200
+    }
+  ],
+  "reservations": [
+    {
+      "id": 1,
+      "name": "Giacchini",
+      "umbrella_number": 124,
+      "umbrellas": 2,
+      "beds": 4,
+      "check_in": "2024-02-15",
+      "check_out": "2024-02-20",
+      "days": 5,
+      "total_price": 500,
+      "price_per_period": {
+        "2024-02-15": 100,
+        "2024-02-16": 100,
+        "2024-02-17": 100,
+        "2024-02-18": 100,
+        "2024-02-19": 100
+      }
+    },
+    {
+      "id": 2,
+      "name": "Neri",
+      "umbrella_number": 125,
+      "umbrellas": 1,
+      "beds": 2,
+      "check_in": "2024-03-01",
+      "check_out": "2024-03-05",
+      "days": 5,
+      "total_price": 400,
+      "price_per_period": {
+        "2024-03-01": 80,
+        "2024-03-02": 80,
+        "2024-03-03": 80,
+        "2024-03-04": 80,
+        "2024-03-05": 80
+      }
+    },
+    {
+      "id": 3,
+      "name": "Rocchi",
+      "umbrella_number": 126,
+      "umbrellas": 3,
+      "beds": 3,
+      "check_in": "2024-04-10",
+      "check_out": "2024-04-15",
+      "days": 5,
+      "total_price": 600,
+      "price_per_period": {
+        "2024-04-10": 120,
+        "2024-04-11": 120,
+        "2024-04-12": 120,
+        "2024-04-13": 120,
+        "2024-04-14": 120,
+        "2024-04-15": 120
+      }
+    }
+  ]
+}
