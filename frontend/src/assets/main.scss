@@ -1,5 +1,6 @@
 @import './base.css';
 @import 'primeicons/primeicons.css';
+
 @layer tailwind-base, primevue, tailwind-utilities;
 
 @layer tailwind-base {
@@ -14,4 +15,21 @@
 #app {
   margin: 0;
   padding: 0;
+}
+
+html {
+  font-size: 14px;
+}
+
+
+.form-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: auto;
+
+  label {
+    margin-left: 2px;
+    font-weight: bold;
+  }
 }
