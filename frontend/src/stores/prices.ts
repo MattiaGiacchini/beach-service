@@ -62,7 +62,7 @@ export const usePricesStore = defineStore('prices', () => {
 
   async function modifyPrice(newPrice: Price) {
     pricesLoading.value = true
-    console.log('STORE', newPrice)
+
     const response: AxiosResponse = await updatePrice(newPrice)
     if (response.data) {
       await fillPrices()

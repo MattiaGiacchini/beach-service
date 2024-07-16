@@ -59,6 +59,27 @@ const getPrices = async (req, res) => {
   }
 }
 
+const getVouchers = async (req, res) => {
+  try {
+    const { limit, sort } = req.query
+
+    const database = await readFileAsync('./animals.json')
+    const data = database.beachservice
+
+    const sliceLimit = limit ?? database.beachservice.length
+
+    if (sort === 'asc') {
+      data.sort((a, b) => (a.numBs > b.numBs ? 1 : -1));
+    } else if (sort === 'desc') {
+      data.sort((a, b) => (a.numBs < b.numBs ? 1 : -1));
+    }
+
+    res.json({ data: data.slice(-sliceLimit) })
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to read the data' })
+  }
+}
+
 const addPrice = async (req, res) => {
   try {
     const database = await readFileAsync('./animals.json')
@@ -152,7 +173,8 @@ const deleteAnimal = async (req, res) => {
 app.get('/api/animals/:id', getAnimalById)
 app.delete('/api/animals/:id', deleteAnimal)
 
-app.get('/api/beachservice', getAll)
+app.get('/api/voucher', getVouchers)
+
 app.get('/api/prices', getPrices)
 app.post('/api/prices', addPrice)
 app.put('/api/prices/:id', updatePrice)

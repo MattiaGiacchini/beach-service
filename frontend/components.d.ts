@@ -30,6 +30,9 @@ declare module 'vue' {
     Row: typeof import('primevue/row')['default']
     TheMenu: typeof import('./src/components/TheMenu.vue')['default']
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
+    ToggleButton: typeof import('primevue/togglebutton')['default']
+    VoucherForm: typeof import('./src/components/VoucherForm.vue')['default']
+    VoucherList: typeof import('./src/components/VoucherList.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }
 }

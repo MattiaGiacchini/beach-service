@@ -1,5 +1,6 @@
 export type BeachService = {
   id: number
+  numBs: number
   name: string
   checkIn: Date
   checkOut: Date

@@ -1,11 +1,23 @@
-<script lang="ts" setup>
-import ReportTable from '@/components/ReportTable.vue'
-import BeachServiceForm from '@/components/BeachServiceForm.vue'
+<script setup lang="ts">
+import { usePricesStore } from '@/stores/prices'
+import VoucherForm from '@/components/VoucherForm.vue'
+import VoucherList from '@/components/VoucherList.vue'
+
+usePricesStore().fillPrices()
 </script>
 
-<template>
-  <main>
-    <BeachServiceForm></BeachServiceForm>
-    <ReportTable />
-  </main>
+<template lang="pug">
+main.voucher-layout
+  VoucherForm
+  VoucherList
 </template>
+
+<style lang="scss">
+.voucher-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 16px;
+  height: calc(100vh - 59.4px);
+}
+</style>
