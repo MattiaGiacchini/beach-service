@@ -20,7 +20,7 @@
     "primevue": "^3.45.0",
     "pug": "^3.0.2",
     "uuid": "^9.0.1",
-    "vue": "^3.3.11",
+    "vue": "^5.3.13",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
