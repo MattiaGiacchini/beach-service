@@ -43,3 +43,14 @@ app.use(PrimeVue, {
 app.directive('focustrap', FocusTrap)
 
 app.mount('#app')
+
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: import.meta.env.BASE_URL,
+  headers: {
+    Authorization: `Bearer ${import.meta.env.BACKEND_API_KEY}`
+  }
+})
+
+export default api
