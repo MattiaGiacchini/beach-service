@@ -33,38 +33,10 @@ export function useTimeUtils() {
     return new Date(date).toLocaleString(locale, options)
   }
 
-  function humanizedDuration(isoDuration: string) {
-    const duration = dayjs.duration(isoDuration)
-    const formattedDuration = []
-
-    const hours = Math.floor(duration.hours())
-    if (hours > 0) {
-      formattedDuration.push(`${hours} hrs`)
-    }
-
-    const minutes = Math.floor(duration.minutes())
-    if (minutes > 0) {
-      formattedDuration.push(`${minutes} min`)
-    }
-
-    const seconds = Math.floor(duration.seconds())
-    if (seconds > 0) {
-      formattedDuration.push(`${seconds} s`)
-    }
-
-    const milliseconds = Math.round(duration.milliseconds())
-    if (milliseconds > 0) {
-      formattedDuration.push(`${milliseconds} ms`)
-    }
-
-    return formattedDuration.join(', ')
-  }
-
   return {
     shortDateTime,
     localizedShortDateTime,
     longDateTime,
-    localizedLongDateTime,
-    humanizedDuration
+    localizedLongDateTime
   }
 }
