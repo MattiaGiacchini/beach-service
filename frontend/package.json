@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run build-only",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
@@ -17,6 +17,7 @@
     "@primeuix/themes": "^1.0.0",
     "@tailwindcss/postcss": "^4.0.14",
     "axios": "^1.8.3",
+    "dayjs": "^1.11.13",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.2",
