@@ -6,7 +6,6 @@ import { createPrice, getPrices, updatePrice } from '@/service/PriceService'
 
 export const usePricesStore = defineStore('prices', () => {
   const prices: Ref<Price[] | undefined> = ref([])
-  const expandedPrices: Ref<number[] | null> = ref([new Date().getFullYear()])
   const editingPrices: Ref<Price[] | undefined> = ref([])
   const pricesLoading: Ref<boolean> = ref(false)
 
@@ -26,9 +25,9 @@ export const usePricesStore = defineStore('prices', () => {
   async function fillPrices() {
     pricesLoading.value = true
 
-    const response: AxiosResponse = await getPrices()
-    if (response.data) {
-      prices.value = response.data
+    const response: AxiosResponse<Price[]> = await getPrices()
+    if (response) {
+      prices.value = response
 
       if (prices.value) {
         prices.value.sort((a: Price, b: Price) => {
@@ -79,7 +78,6 @@ export const usePricesStore = defineStore('prices', () => {
     pricesLoading,
     fillPrices,
     addPrice,
-    expandedPrices,
     editingPrices,
     modifyPrice
   }

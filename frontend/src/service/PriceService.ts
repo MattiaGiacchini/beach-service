@@ -1,15 +1,14 @@
 import { http } from '@/composable/http'
 import type { Price, PriceCreationRequest } from '@/types/Prices'
+import type { AxiosResponse } from 'axios'
+import { supabase } from '@/composable/supabase'
 
 const URL_PRICE: string = '/prices'
 
-async function getPrices() {
-  return http
-    .get(URL_PRICE)
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
+async function getPrices(): AxiosResponse<Price[]> {
+  const { data, error } = await supabase.from('prices').select() // return http
+  console.log(data)
+  return data
 }
 
 async function createPrice(price: PriceCreationRequest) {

@@ -7,21 +7,22 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
+import ToastService from 'primevue/toastservice'
 
 const AuraPreset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '{blue.50}',
-      100: '{blue.100}',
-      200: '{blue.200}',
-      300: '{blue.300}',
-      400: '{blue.400}',
-      500: '{blue.500}',
-      600: '{blue.600}',
-      700: '{blue.700}',
-      800: '{blue.800}',
-      900: '{blue.900}',
-      950: '{blue.950}'
+      50: '{sky.50}',
+      100: '{sky.100}',
+      200: '{sky.200}',
+      300: '{sky.300}',
+      400: '{sky.400}',
+      500: '{sky.500}',
+      600: '{sky.600}',
+      700: '{sky.700}',
+      800: '{sky.800}',
+      900: '{sky.900}',
+      950: '{sky.950}'
     }
   }
 })
@@ -34,23 +35,13 @@ app.use(PrimeVue, {
   theme: {
     preset: AuraPreset,
     options: {
-      prefix: 'bs',
-      darkModeSelector: 'system',
+      prefix: 'p',
+      darkModeSelector: '.p-dark',
       cssLayer: false
     }
   }
 })
+app.use(ToastService)
 app.directive('focustrap', FocusTrap)
 
 app.mount('#app')
-
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: import.meta.env.BASE_URL,
-  headers: {
-    Authorization: `Bearer ${import.meta.env.BACKEND_API_KEY}`
-  }
-})
-
-export default api

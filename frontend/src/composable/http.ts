@@ -1,4 +1,9 @@
-import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse
+} from 'axios'
 
 class HttpClient {
   private instance: AxiosInstance
@@ -7,8 +12,9 @@ class HttpClient {
     this.instance = axios.create({
       baseURL,
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=utf-8'
+        Accept: 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        apiKey: import.meta.env.VITE_BACKEND_API_KEY
       }
     })
   }
@@ -17,7 +23,11 @@ class HttpClient {
     return this.request<T>({ ...config, method: 'get', url })
   }
 
-  async post<T, R>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async post<T, R>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> {
     return this.request<T>({ ...config, method: 'post', url, data })
   }
 
@@ -53,4 +63,4 @@ class HttpClient {
   }
 }
 
-export const http = new HttpClient('http://localhost:3000/api')
+export const http = new HttpClient(import.meta.env.VITE_BACKEND_BASE_URL)
