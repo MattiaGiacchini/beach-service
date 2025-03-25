@@ -1,14 +1,29 @@
 import { http } from '@/composable/http'
 import type { Price, PriceCreationRequest } from '@/types/Prices'
-import type { AxiosResponse } from 'axios'
 import { supabase } from '@/composable/supabase'
+import { useToast } from 'primevue/usetoast'
 
 const URL_PRICE: string = '/prices'
 
-async function getPrices(): AxiosResponse<Price[]> {
-  const { data, error } = await supabase.from('prices').select() // return http
-  console.log(data)
-  return data
+async function getPrices(): Promise<Price[]> {
+  const toast = useToast()
+
+  try {
+    const { data, error } = await supabase.from('prices').select()
+    if (error) {
+      throw error
+    }
+    return data || []
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: `Error fetching prices: ${error.message}`,
+      life: 3000
+    })
+
+    return []
+  }
 }
 
 async function createPrice(price: PriceCreationRequest) {

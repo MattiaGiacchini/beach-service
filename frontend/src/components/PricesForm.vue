@@ -39,22 +39,6 @@ div.p-card.p-component {
   height: fit-content;
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 2;
-}
-
-.form-row {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  & > * {
-    width: 100%;
-  }
-}
-
 .actions {
   display: flex;
   justify-content: flex-end;

@@ -8,6 +8,7 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
 import ToastService from 'primevue/toastservice'
+import DialogService from 'primevue/dialogservice'
 
 const AuraPreset = definePreset(Aura, {
   semantic: {
@@ -42,6 +43,7 @@ app.use(PrimeVue, {
   }
 })
 app.use(ToastService)
+app.use(DialogService)
 app.directive('focustrap', FocusTrap)
 
 app.mount('#app')

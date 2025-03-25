@@ -18,6 +18,6 @@ main.prices-layout
   flex-direction: row;
   gap: 16px;
   padding: 16px;
-  height: calc(100vh - 59.4px);
+  height: 100%;
 }
 </style>
