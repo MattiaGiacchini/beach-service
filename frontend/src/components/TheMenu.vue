@@ -4,6 +4,19 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Logo from '@/assets/Logo.vue'
 
+const items = ref([])
+
+onMounted(async () => {
+  const { routes } = await import('@/router/routes')
+  items.value = routes
+    .filter((route) => route.meta.showInMenu)
+    .map((route) => ({
+      label: route.meta.title,
+      icon: route.meta.icon,
+      route: route.path
+    }))
+})
+
 const router = useRouter()
 
 const isDarkTheme = ref(false)
@@ -31,38 +44,6 @@ onMounted(() => {
     document.documentElement.classList.add('p-dark')
   }
 })
-
-const items = ref([
-  {
-    label: 'Home',
-    icon: 'pi pi-palette',
-    route: '/'
-  },
-
-  {
-    label: 'Login',
-    icon: 'pi pi-user',
-    route: 'login'
-  },
-
-  {
-    label: 'Prices',
-    icon: 'pi pi-palette',
-    route: 'prices'
-  },
-
-  {
-    label: 'Beach Service',
-    icon: 'pi pi-palette',
-    route: 'beach-service'
-  },
-
-  {
-    label: 'Report',
-    icon: 'pi pi-palette',
-    route: 'report'
-  }
-])
 
 function setFavicon(theme) {
   const favicon = document.querySelector("link[rel='icon']") || document.createElement('link')

@@ -16,6 +16,7 @@ async function loginUser(email: string, password: string): Promise<AuthResponseP
     return data
   } catch (error) {
     const toast = useToast()
+
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -23,6 +24,8 @@ async function loginUser(email: string, password: string): Promise<AuthResponseP
       life: 3000
     })
   }
+
+  return null
 }
 
 async function signupUser(email: string, password: string) {
@@ -54,19 +57,13 @@ async function logoutUser() {
       throw error
     }
   } catch (error) {
-    console.error('Error en logout:', error)
-    throw error
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: `Error logging out: ${error.message}`,
+      life: 3000
+    })
   }
 }
 
-async function checkSession() {
-  const toast = useToast()
-  try {
-    return supabase.auth.check()
-  } catch (error) {
-    console.error('Error en checkSession:', error)
-    throw error
-  }
-}
-
-export { loginUser, logoutUser, signupUser, checkSession }
+export { loginUser, logoutUser, signupUser }

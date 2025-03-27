@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import FloatLabel from 'primevue/floatlabel'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
+import router from '@/router'
 
 const store = useUserStore()
 const { userLoading } = storeToRefs(store)
@@ -13,7 +14,12 @@ const password = ref('')
 
 async function login() {
   if (email.value && password.value) {
-    await useUserStore().login(email.value, password.value)
+    try {
+      await useUserStore().login(email.value, password.value)
+      router.push('/prices')
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 </script>

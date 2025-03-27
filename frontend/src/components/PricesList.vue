@@ -27,7 +27,7 @@ div.list-container
         :loading="pricesLoading"
       )
 
-        Column(field="startDate" :sortable="true" header="Start Date")
+        Column(field="startDate" header="Start Date")
           template(#body="slotProps")
             p {{ localizedShortDateTime(slotProps.data.start_date) }}
         Column(field="endDate" header="End Date")
