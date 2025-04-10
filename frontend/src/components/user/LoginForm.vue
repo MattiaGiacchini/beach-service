@@ -12,8 +12,12 @@ const { userLoading } = storeToRefs(store)
 const email = ref('')
 const password = ref('')
 
-async function login() {
-  if (email.value && password.value) {
+function disableButton() {
+  return !(email.value && password.value)
+}
+
+async function submitForm() {
+  if (!disableButton()) {
     try {
       await useUserStore().login(email.value, password.value)
       router.push('/prices')
@@ -30,7 +34,7 @@ Card
     div.login-form
       Logo.login-logo
       divider
-      form(v-focustrap).form-container
+      form(v-focustrap @submit.prevent="submitForm" @keydown.enter="submitForm").form-container
         div.form-row
           FloatLabel(variant="in")
             InputText(id="email" v-model="email" :fluid="true")
@@ -38,11 +42,11 @@ Card
 
         div.form-row
           FloatLabel(variant="in")
-            Password(v-model="password" id="password" :fluid="true")
+            Password(v-model="password" id="password" :fluid="true" toggleMask)
             label(for="password") Password
 
         div.form-row
-          Button(label='Sign In' :fluid="true" @click="login" :loading="userLoading")
+          Button(label='Sign In' :fluid="true" @click="submitForm" :loading="userLoading" :disabled="disableButton()")
 
 
 </template>

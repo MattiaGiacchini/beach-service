@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePricesStore } from '@/stores/prices'
-import VoucherForm from '@/components/VoucherForm.vue'
-import VoucherList from '@/components/VoucherList.vue'
+import VoucherForm from '@/components/vouchers/VoucherForm.vue'
+import VoucherList from '@/components/vouchers/VoucherList.vue'
 
 usePricesStore().fillPrices()
 </script>

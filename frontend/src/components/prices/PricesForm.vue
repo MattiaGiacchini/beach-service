@@ -11,13 +11,19 @@ function disableButton() {
   const validDates = dates.value?.every((date: Date) => date !== null)
   return !(validDates && price.value)
 }
+
+function submitForm() {
+  if (!disableButton()) {
+    pricesStore.addPrice()
+  }
+}
 </script>
 
 <template lang="pug">
 Card
   template(#title) New price
   template(#content)
-    form.form-container
+    form.form-container(@submit.prevent="submitForm" @keydown.enter="submitForm")
       div(v-focustrap).form-row
         FloatLabel(variant="in")
           label(for="name" ) Name

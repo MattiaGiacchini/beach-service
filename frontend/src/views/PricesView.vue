@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import PricesForm from '@/components/PricesForm.vue'
+import PricesForm from '@/components/prices/PricesForm.vue'
+import PricesList from '@/components/prices/PricesList.vue'
 import { usePricesStore } from '@/stores/prices'
-import PricesList from '@/components/PricesList.vue'
 
 usePricesStore().fillPrices()
 </script>

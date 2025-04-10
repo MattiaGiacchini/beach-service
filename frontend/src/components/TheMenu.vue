@@ -21,6 +21,8 @@ const router = useRouter()
 
 const isDarkTheme = ref(false)
 function toggleDarkMode() {
+  isDarkTheme.value = !isDarkTheme.value
+
   if (isDarkTheme.value) {
     document.documentElement.classList.add('p-dark')
   } else {
@@ -30,11 +32,6 @@ function toggleDarkMode() {
   localStorage.setItem('theme', isDarkTheme.value ? 'dark' : 'light')
   setFavicon(isDarkTheme.value ? 'dark' : 'light')
 }
-
-const options = ref([
-  { icon: 'pi pi-sun', value: 'false', label: 'Light' },
-  { icon: 'pi pi-moon', value: 'true', label: 'Dark' }
-])
 
 onMounted(() => {
   isDarkTheme.value = localStorage.getItem('theme') === 'dark'
@@ -54,23 +51,17 @@ function setFavicon(theme) {
 </script>
 
 <template lang="pug">
-  Menubar(:model="items")
-    template(#start)
-      Logo.menu-logo
-    template(#item="{ item, props }")
-      router-link(v-slot="{ href, navigate }" :to="item.route" custom)
-        a(:href="href" v-bind="props.action" @click="navigate")
-          span(:class="item.icon")
-          span.ml-2 {{ item.label }}
-    template(#end)
-      ToggleButton(
-        v-model="isDarkTheme"
-        @update:model-value="toggleDarkMode"
-        onLabel="Dark"
-        offLabel="Light"
-        onIcon="pi pi-moon"
-        offIcon="pi pi-sun"
-      )
+Menubar(:model="items")
+  template(#start)
+    Logo.menu-logo
+  template(#item="{ item, props }")
+    router-link(v-slot="{ href, navigate }" :to="item.route" custom)
+      a(:href="href" v-bind="props.action" @click="navigate")
+        span(:class="item.icon")
+        span.ml-2 {{ item.label }}
+  template(#end)
+    Button( :icon="isDarkTheme ? 'pi pi-moon' : 'pi pi-sun'" rounded variant="outlined" aria-label="Filter"
+      severity="secondary" @click="toggleDarkMode()")
 </template>
 
 <style lang="scss">

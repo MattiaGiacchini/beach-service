@@ -2,13 +2,12 @@
 import { RouterView } from 'vue-router'
 import TheMenu from '@/components/TheMenu.vue'
 import Toast from 'primevue/toast'
+import Drawer from 'primevue/drawer'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
 const { isUserAuthenticated } = storeToRefs(userStore)
-
-console.log(isUserAuthenticated.value)
 </script>
 
 <template lang="pug">
@@ -16,7 +15,7 @@ div.layout
   Toast
   TheMenu(v-show="isUserAuthenticated")
   div.q
-    RouterView
+      RouterView
 </template>
 
 <style scoped>

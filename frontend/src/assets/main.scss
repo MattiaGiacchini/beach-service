@@ -64,7 +64,8 @@ body {
 text-align: end;
 }
 
-.form-container {
+.form-container,
+.form-col {
   display: flex;
   flex-direction: column;
   gap: 16px;
