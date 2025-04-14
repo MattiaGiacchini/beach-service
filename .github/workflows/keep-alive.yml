@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Hacer ping a Supabase
         run: |
-          curl 'https://zysmahahdthoeyerklqt.supabase.co/rest/v1/prices?select=*' \
+          curl -X GET \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+            https://zysmahahdthoeyerklqt.supabase.co/rest/v1/prices
