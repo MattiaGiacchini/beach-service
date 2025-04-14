@@ -1,0 +1,16 @@
+name: Ping Supabase
+
+on:
+  schedule:
+    - cron: '34 9 * * MON,WED,FRI' 
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hacer ping a Supabase
+        run: |
+          curl 'https://zysmahahdthoeyerklqt.supabase.co/rest/v1/prices?select=*' \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
