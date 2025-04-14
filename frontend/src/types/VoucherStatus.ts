@@ -46,3 +46,14 @@ export const VoucherStatus: {
     text: 'Pending Payment'
   }
 }
+
+export const VoucherStatuses = [
+  { text: 'draft' },
+  { text: 'readyForApproval' },
+  { text: 'approved' },
+  { text: 'cancelled' },
+  { text: 'paid' },
+  { text: 'rejected' },
+  { text: 'closed' },
+  { text: 'pendingPayment' }
+]

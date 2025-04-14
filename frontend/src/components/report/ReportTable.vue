@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, type Ref } from 'vue'
-import type { BeachService } from '@/types/BeachService'
-import { usePricesStore } from '@/stores/prices'
 import { storeToRefs } from 'pinia'
 import { useReportStore } from '@/stores/report'
-import { VoucherStatus } from '@/types/VoucherStatus'
+import { VoucherStatus, VoucherStatuses } from '@/types/VoucherStatus'
+import Select from 'primevue/select'
 
 const reportStore = useReportStore()
 const { reportLoading, report, totalRevenue } = storeToRefs(reportStore)
@@ -26,6 +24,7 @@ div.list-container
         scrollable
         scroll-height="flex"
         striped-rows
+        editMode="cell"
       )
         ColumnGroup(type="header")
           Row
@@ -55,7 +54,9 @@ div.list-container
             DataTable.nested-table(:stripedRows="false" :value="slotProps.data.priceDetails"
               :showHeaders="false")
               Column(field="days")
-              Column(field="price" dataType="numeric")
+              Column(field="price" dataType="numeric").numeric
+                template(#body="slotProps") {{ formatCurrency(slotProps.data.price) }}
+
               Column(field="umbrellasVariation" dataType="numeric")
                 template(#body="slotProps")
                   p(v-if="slotProps.data.umbrellasVariation > 1") {{slotProps.data.umbrellasVariation}}
@@ -74,8 +75,13 @@ div.list-container
             Tag(:value="VoucherStatus[slotProps.data.voucherStatus].text.toUpperCase()"
               :severity="VoucherStatus[slotProps.data.voucherStatus].color")
 
+          template(#editor="{ data, field }")
+            Select(v-model="data.voucherStatus" editable :options="VoucherStatuses" optionLabel="text"
+              placeholder="Status")
 
-        //
+
+
+//
         //Column(field="bsNumber" header="Id")
         //Column(field="customerName" header="Customer Name")
         //Column(field="checkIn" header="Check In")
