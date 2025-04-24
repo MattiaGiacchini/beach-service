@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import type { Price, PriceCreationRequest } from '@/types/Prices'
 import type { AxiosResponse } from 'axios'
 import { createPrice, getPrices, updatePrice } from '@/service/PriceService'
+import { useTimeUtils } from '@/composables/timeUtils'
 
 export const usePricesStore = defineStore('prices', () => {
   const prices: Ref<Price[] | undefined> = ref([])
@@ -15,6 +16,8 @@ export const usePricesStore = defineStore('prices', () => {
 
   const startDate = computed(() => dates?.value[0])
   const endDate = computed(() => dates?.value[1])
+
+  const { formatDateToYMD } = useTimeUtils()
 
   function $reset() {
     price.value = 0
@@ -45,8 +48,9 @@ export const usePricesStore = defineStore('prices', () => {
     const priceCreation: PriceCreationRequest = {
       ...(name && { name: name.value }),
       price: price.value,
-      startDate: startDate.value,
-      endDate: endDate.value,
+      startDate: formatDateToYMD(startDate.value),
+      endDate: formatDateToYMD(endDate.value),
+
       year: new Date(startDate.value).getFullYear()
     }
 

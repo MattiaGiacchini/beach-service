@@ -2,8 +2,6 @@
 import { usePricesStore } from '@/stores/prices'
 import VoucherForm from '@/components/vouchers/VoucherForm.vue'
 import VoucherList from '@/components/vouchers/VoucherList.vue'
-
-usePricesStore().fillPrices()
 </script>
 
 <template lang="pug">

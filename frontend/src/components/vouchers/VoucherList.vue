@@ -2,10 +2,11 @@
 import type { Price } from '@/types/Prices'
 import { usePricesStore } from '@/stores/prices'
 import { storeToRefs } from 'pinia'
-import { useTimeUtils } from '@/composable/timeUtils'
+import { useTimeUtils } from '@/composables/timeUtils'
+import { useVoucherStore } from '@/stores/voucher'
 
-const pricesStore = usePricesStore()
-const { pricesLoading, prices, expandedPrices, editingPrices } = storeToRefs(pricesStore)
+const voucherStore = useVoucherStore()
+const { voucherLoading, lastVouchers } = storeToRefs(voucherStore)
 
 const { localizedShortDateTime } = useTimeUtils()
 
@@ -19,50 +20,29 @@ const onRowEditSave = async (event) => {
 <template lang="pug">
 div.list-container
   Card
-    template(#title) Prices
+    template(#title) Last vouchers
     template(#content).list
       DataTable(
-        v-model:expanded-row-groups="expandedPrices"
-        v-model:editing-rows="editingPrices"
-        :value="prices"
-        data-key="id"
-        sort-field="startDate"
-        :sortOrder="-1"
+        :value="lastVouchers"
+        :loading="voucherLoading"
+        :striped-rows="true"
         :scrollable="true"
+        data-key="id"
         scroll-height="flex"
         lazy
-        :loading="pricesLoading"
-        :expandable-row-groups="true"
-        row-group-mode="subheader"
-        group-rows-by="year"
-        edit-mode="row"
-        @row-edit-save="onRowEditSave"
       )
 
-        template(#groupheader='slotProps')
-          div.inline-flex.vertical-align-middle.font-bold.line-height-3
-            p {{ slotProps.data.year }}
+        Column(field="bsNumber" header="BS Number").center-text
+        Column(field="customerName" header="Customer Name").center-text
 
-        Column(field="startDate" :sortable="true" header="Start Date")
-          template(#body="slotProps")
-            p {{ localizedShortDateTime(slotProps.data.startDate) }}
-        Column(field="endDate" header="End Date")
-          template(#body="slotProps")
-            p {{ localizedShortDateTime(slotProps.data.endDate) }}
-        Column(field="price" header="Price")
-          template(#body='{ data, field }') {{data.price}}
-          template(#editor='{ data, field }')
-            InputNumber(
-              v-model='data.price'
-              input-id="price"
-              :step='0.5'
-              :min='0'
-              mode='currency'
-              currency='EUR'
-            )
-        Column(:row-editor="true" )
+        Column(field="checkIn" header="Check-in").center-text
+          template(#body="slotProps") {{useTimeUtils().localizedShortDateTime(slotProps.data.checkIn)}}
 
+        Column(field="checkOut" header="Check out" ).center-text
+          template(#body="slotProps") {{useTimeUtils().localizedShortDateTime(slotProps.data.checkOut)}}
 
+        Column(field="umbrellas" header="Umbrellas").center-text
+        Column(field="beds" header="Beds").center-text
 </template>
 
 <style lang="scss">

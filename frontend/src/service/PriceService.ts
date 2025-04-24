@@ -1,48 +1,46 @@
-import { http } from '@/composable/http'
+import { supabase } from '@/composables/supabase'
 import type { Price, PriceCreationRequest } from '@/types/Prices'
-import { supabase } from '@/composable/supabase'
-import { useToast } from 'primevue/usetoast'
+import { useToastMessage } from '@/composables/toastMessage'
 
-const URL_PRICE: string = '/prices'
+const { showErrorToast } = useToastMessage()
 
 async function getPrices(): Promise<Price[]> {
-  const toast = useToast()
-
   try {
-    const { data, error } = await supabase.from('prices').select()
-    if (error) {
-      throw error
-    }
+    const { data, error } = await supabase
+      .from('prices')
+      .select()
+      .order('year', { ascending: false })
+      .order('startDate', { ascending: true })
+    if (error) throw error
     return data || []
-  } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: `Error fetching prices: ${error.message}`,
-      life: 3000
-    })
-
+  } catch (error: any) {
+    showErrorToast(error)
     return []
   }
 }
 
-async function createPrice(price: PriceCreationRequest) {
-  return http
-    .post(URL_PRICE, price)
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
+async function createPrice(price: PriceCreationRequest): Promise<Price | null> {
+  try {
+    const { data, error } = await supabase.from('prices').insert([price]).select()
+    if (error) throw error
+    return data?.[0] ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
 }
 
-async function updatePrice(price: Price) {
-  console.log('SERVICE', price)
-  return http
-    .put(`${URL_PRICE}/${price.id}`, price)
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
+async function updatePrice(price: Price): Promise<Price | null> {
+  try {
+    const { data, error } = await supabase.from('prices').update(price).eq('id', price.id).select()
+
+    if (error) throw error
+
+    return data?.[0] ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
 }
 
 export { getPrices, createPrice, updatePrice }

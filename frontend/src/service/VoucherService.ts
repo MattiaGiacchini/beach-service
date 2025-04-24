@@ -1,39 +1,106 @@
-import { http } from '@/composable/http'
-import type { Price, PriceCreationRequest } from '@/types/Prices'
+import { supabase } from '@/composables/supabase'
+import type { Voucher, VoucherCreation, VoucherPeriodDetails } from '@/types/Voucher'
+import { useToastMessage } from '@/composables/toastMessage'
+const { showErrorToast } = useToastMessage()
 
-const URL_VOUCHER: string = '/voucher'
+async function getLastVouchers(limit = 10): Promise<Voucher[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('vouchers')
+      .select()
+      .order('checkIn', { ascending: false })
+      .order('bsNumber', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(limit)
 
-async function getVouchers(sort: 'asc' | 'desc' = 'desc', limit?: number) {
-  const params = {
-    ...(limit && { limit: limit }),
-    ...(sort && { sort: sort })
+    if (error) throw error
+
+    return data
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
   }
-
-  return http
-    .get(URL_VOUCHER, { params })
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
 }
 
-async function createPrice(price: PriceCreationRequest) {
-  return http
-    .post(URL_VOUCHER, price)
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
+async function getVoucherById(voucherId: string): Promise<Voucher | null> {
+  try {
+    const { data, error } = await supabase.from('vouchers').select().eq('id', voucherId).single()
+
+    if (error) throw error
+
+    return data
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
 }
 
-async function updatePrice(price: Price) {
-  console.log('SERVICE', price)
-  return http
-    .put(`${URL_PRICE}/${price.id}`, price)
-    .then(http.handleResponse)
-    .catch((error) => {
-      throw new Error(`Failed to fetch prices: ${error.message}`)
-    })
+async function createVoucher(voucher: VoucherCreation): Promise<Voucher | null> {
+  try {
+    const { data, error } = await supabase.from('vouchers').insert([voucher]).select()
+
+    if (error) throw error
+
+    return data?.[0] ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
+}
+async function createVoucherPeriodsDetails(
+  periods: VoucherPeriodDetails[]
+): Promise<Voucher | null> {
+  try {
+    const { data, error } = await supabase.from('voucher-pricing-details').insert(periods).select()
+
+    if (error) throw error
+
+    return data?.[0] ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
 }
 
-export { getVouchers, createPrice, updatePrice }
+async function getLastVoucherNumber(): Promise<number | null> {
+  try {
+    const { data, error } = await supabase
+      .from('vouchers')
+      .select('bsNumber')
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    if (error) throw error
+
+    return data?.[0]?.bsNumber ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
+}
+
+async function getOldCustomersNames() {
+  try {
+    const { data, error } = await supabase
+      .from('vouchers')
+      .select('customerName')
+      .order('customerName', { ascending: true })
+      .range(0, 10_000)
+
+    if (error) throw error
+
+    return data ?? null
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
+}
+
+export {
+  getLastVoucherNumber,
+  getVoucherById,
+  getLastVouchers,
+  createVoucher,
+  createVoucherPeriodsDetails,
+  getOldCustomersNames
+}

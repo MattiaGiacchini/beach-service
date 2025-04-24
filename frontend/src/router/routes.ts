@@ -3,12 +3,13 @@ import LoginView from '@/views/LoginView.vue'
 import ReportView from '@/views/ReportView.vue'
 import PricesView from '@/views/PricesView.vue'
 import VoucherView from '@/views/VoucherView.vue'
+import ChartView from '@/views/ChartView.vue'
 
 export const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    component: ChartView,
     meta: {
       title: 'Home',
       icon: 'pi pi-home',

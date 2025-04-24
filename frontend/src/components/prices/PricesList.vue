@@ -2,8 +2,8 @@
 import type { Price } from '@/types/Prices'
 import { usePricesStore } from '@/stores/prices'
 import { storeToRefs } from 'pinia'
-import { useTimeUtils } from '@/composable/timeUtils'
-import { useCurrencyUtils } from '@/composable/currencyUtils'
+import { useTimeUtils } from '@/composables/timeUtils'
+import { useCurrencyUtils } from '@/composables/currencyUtils'
 
 const pricesStore = usePricesStore()
 const { pricesLoading, prices, editingPrices } = storeToRefs(pricesStore)
@@ -29,10 +29,10 @@ div.list-container
 
         Column(field="startDate" header="Start Date")
           template(#body="slotProps")
-            p {{ localizedShortDateTime(slotProps.data.start_date) }}
+            p {{ localizedShortDateTime(slotProps.data.startDate) }}
         Column(field="endDate" header="End Date")
           template(#body="slotProps")
-            p {{ localizedShortDateTime(slotProps.data.end_date) }}
+            p {{ localizedShortDateTime(slotProps.data.endDate) }}
         Column(field="price" header="Price")
           template(#body='{ data, field }')
             p.currency-field {{formatCurrency(data.price)}}

@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useReportStore } from '@/stores/report'
 import { VoucherStatus, VoucherStatuses } from '@/types/VoucherStatus'
 import Select from 'primevue/select'
+import { useTimeUtils } from '@/composables/timeUtils'
 
 const reportStore = useReportStore()
 const { reportLoading, report, totalRevenue } = storeToRefs(reportStore)
@@ -21,56 +22,65 @@ div.list-container
         :value="report"
         rowGroupMode="rowspan"
         :loading="reportLoading"
+        :lazy="true"
         scrollable
+        size="normal"
         scroll-height="flex"
         striped-rows
         editMode="cell"
       )
         ColumnGroup(type="header")
           Row
-            Column(header="Id")
-            Column(header="Customer Name")
-            Column(header="Check In")
-            Column(header="Check Out")
-            Column(header="Umbrellas")
-            Column(header="Beds")
-            Column(header="Days")
-            Column(header="Price")
-            Column(header="UV")
-            Column(header="BV")
-            Column(header="Partial Price")
-            Column(header="Total Price")
-            Column(header="Status")
+            Column(header="Id").center-text
+            Column(header="Customer Name").center-text
+            Column(header="Check In").center-text
+            Column(header="Check Out").center-text
+            Column(header="Umbrellas").center-text
+            Column(header="Beds").center-text
+            Column(header="Days").calculation-column.center-text
+            Column(header="Price").calculation-column.center-text
+            Column(header="U. Var.").calculation-column.center-text
+            Column(header="B. Var.").calculation-column.center-text
+            Column(header="Partial Price").calculation-result-column.center-text
+            Column(header="Total Price").calculation-result-column.center-text
+            Column(header="Status").center-text
 
 
-        Column(field="bsNumber" dataType="numeric")
+        Column(field="bsNumber" dataType="numeric").center-text
         Column(field="customerName")
-        Column(field="checkIn")
-        Column(field="checkOut")
-        Column(field="umbrellas" dataType="numeric")
-        Column(field="beds" dataType="numeric")
+        Column(field="checkIn").center-text
+          template(#body="slotProps") {{useTimeUtils().localizedShortDateTime(slotProps.data.checkIn)}}
+
+        Column(field="checkOut").center-text
+          template(#body="slotProps") {{useTimeUtils().localizedShortDateTime(slotProps.data.checkOut)}}
+
+        Column(field="umbrellas" dataType="numeric").center-text
+        Column(field="beds" dataType="numeric").center-text
         Column(:colspan="5")
           template(#body="slotProps")
-            DataTable.nested-table(:stripedRows="false" :value="slotProps.data.priceDetails"
-              :showHeaders="false")
-              Column(field="days")
-              Column(field="price" dataType="numeric").numeric
+            DataTable.nested-table(
+              :stripedRows="false"
+              :value="slotProps.data.priceDetails"
+              :showHeaders="false"
+            )
+              Column(field="days").center-text.calculation-column
+              Column(field="price" dataType="numeric").right-text.calculation-column
                 template(#body="slotProps") {{ formatCurrency(slotProps.data.price) }}
 
-              Column(field="umbrellasVariation" dataType="numeric")
+              Column(field="umbrellasVariation" dataType="numeric").center-text.calculation-column
                 template(#body="slotProps")
-                  p(v-if="slotProps.data.umbrellasVariation > 1") {{slotProps.data.umbrellasVariation}}
-              Column(field="bedsVariation" dataType="numeric")
+                  p(v-if="slotProps.data.umbrellasVariation > 1") {{ `x${slotProps.data.umbrellasVariation}` }}
+              Column(field="bedsVariation" dataType="numeric").center-text.calculation-column
                 template(#body="slotProps")
                   p(v-if="slotProps.data.bedsVariation") {{slotProps.data.bedsVariation}}
 
-              Column(field="pricePerPeriod" dataType="numeric").numeric
+              Column(field="pricePerPeriod" dataType="numeric").right-text.calculation-result-column
                 template(#body="slotProps") {{ formatCurrency(slotProps.data.pricePerPeriod) }}
 
 
-        Column(field="totalVoucherValue" dataType="numeric").numeric
+        Column(field="totalVoucherValue" dataType="numeric").right-text.calculation-result-column
           template(#body="slotProps") {{ formatCurrency(slotProps.data.totalVoucherValue) }}
-        Column(field="voucherStatus")
+        Column(field="voucherStatus").center-text
           template(#body="slotProps")
             Tag(:value="VoucherStatus[slotProps.data.voucherStatus].text.toUpperCase()"
               :severity="VoucherStatus[slotProps.data.voucherStatus].color")
@@ -79,54 +89,10 @@ div.list-container
             Select(v-model="data.voucherStatus" editable :options="VoucherStatuses" optionLabel="text"
               placeholder="Status")
 
-
-
-//
-        //Column(field="bsNumber" header="Id")
-        //Column(field="customerName" header="Customer Name")
-        //Column(field="checkIn" header="Check In")
-        //Column(field="checkOut" header="Check Out")
-        //Column(field="umbrellas" header="Umbrellas")
-        //Column(field="beds" header="Beds")
-        //Column(field="days" header="Days")
-        //  template(#body="slotProps")
-        //      div(v-for="(item, index) in slotProps.data.priceDetails" :key="index")
-        //        span {{ item.days }}
-        //        Divider(v-if="index < slotProps.data.priceDetails.length - 1")
-        //
-        //Column(field="price" header="Price")
-        //  template(#body="slotProps")
-        //    div(v-for="(item, index) in slotProps.data.priceDetails" :key="index")
-        //      span {{ item.price }}
-        //      Divider(v-if="index < slotProps.data.priceDetails.length - 1")
-        //
-        //Column(field="umbrellasVariation" header="UV")
-        //  template(#body="slotProps")
-        //    div(v-for="(item, index) in slotProps.data.priceDetails" :key="index")
-        //      span(v-show="item.umbrellasVariation !== 1") {{ item.umbrellasVariation }}
-        //      Divider(v-if="index < slotProps.data.priceDetails.length - 1")
-        //
-        //Column(field="bedsVariation" header="BV")
-        //
-        //  template(#body="slotProps")
-        //    div(v-for="(item, index) in slotProps.data.priceDetails" :key="index")
-        //      span(v-show="item.bedsVariation") {{ item.bedsVariation }}
-        //      Divider(v-if="index < slotProps.data.priceDetails.length - 1")
-        //
-        //Column( header="Partial Price")
-        //  template(#body="slotProps")
-        //    div(v-for="(item, index) in slotProps.data.priceDetails" :key="index")
-        //      span {{ item.pricePerPeriod }}
-        //      Divider(v-if="index < slotProps.data.priceDetails.length - 1")
-        //
-        //
-        //
-        //Column(field="totalVoucherValue" header="Price")
-
         ColumnGroup(type="footer" :frozen="true")
           Row(:frozen="true")
             Column(footer="Totals:" :colspan="11" footerStyle="text-align:right")
-            Column(:footer="formatCurrency(totalRevenue)").numeric
+            Column(:footer="formatCurrency(totalRevenue)").right-text
             Column(footer="")
 
 </template>
@@ -155,7 +121,36 @@ div.list-container
   }
 }
 
-td.numeric {
+td:has(div.nested-table) {
+  padding: 0 !important;
+}
+
+td.right-text {
   text-align: end !important;
+}
+
+td.center-text {
+  text-align: center !important;
+}
+
+td.left-text {
+  text-align: start !important;
+}
+
+th.center-text .p-datatable-column-header-content {
+  text-align: center;
+  justify-content: center;
+}
+
+.calculation-column {
+  min-width: 85px !important;
+  width: 85px !important;
+  max-width: 85px !important;
+}
+
+.calculation-result-column {
+  min-width: 120px !important;
+  width: 120px !important;
+  max-width: 120px !important;
 }
 </style>

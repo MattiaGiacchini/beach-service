@@ -20,7 +20,7 @@ async function submitForm() {
   if (!disableButton()) {
     try {
       await useUserStore().login(email.value, password.value)
-      router.push('/prices')
+      router.push('/report')
     } catch (error) {
       console.log(error)
     }

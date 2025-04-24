@@ -1,5 +1,5 @@
 export function useTimeUtils() {
-  const locale = 'en-GB'
+  const locale = 'es-ES'
 
   function shortDateTime(date: Date): string {
     return date.toLocaleString(locale)
@@ -33,10 +33,15 @@ export function useTimeUtils() {
     return new Date(date).toLocaleString(locale, options)
   }
 
+  function formatDateToYMD(date: Date): string {
+    return date.toLocaleDateString('en-CA')
+  }
+
   return {
     shortDateTime,
     localizedShortDateTime,
     longDateTime,
-    localizedLongDateTime
+    localizedLongDateTime,
+    formatDateToYMD
   }
 }

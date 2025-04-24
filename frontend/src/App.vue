@@ -2,12 +2,14 @@
 import { RouterView } from 'vue-router'
 import TheMenu from '@/components/TheMenu.vue'
 import Toast from 'primevue/toast'
-import Drawer from 'primevue/drawer'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
+import { useVoucherStore } from '@/stores/voucher'
 
 const userStore = useUserStore()
 const { isUserAuthenticated } = storeToRefs(userStore)
+
+useVoucherStore().fillOldCustomersNames()
 </script>
 
 <template lang="pug">

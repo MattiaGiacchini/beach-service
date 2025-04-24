@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { usePricesStore } from '@/stores/prices'
 import { storeToRefs } from 'pinia'
 import { useVoucherStore } from '@/stores/voucher'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import FloatLabel from 'primevue/floatlabel'
 import DatePicker from 'primevue/datepicker'
 import InputNumber from 'primevue/inputnumber'
@@ -13,25 +12,34 @@ const {
   bsNumber,
   dates,
   friendly,
-  name,
-  room,
+  customerName,
+  roomNumber,
   umbrellas,
   voucherLoading,
+  lastVoucherNumber,
   vouchers,
-  lastVouchers
+  lastVouchers,
+  oldCustomersNames
 } = storeToRefs(voucherStore)
 
 function disableButton() {
   const validDates = dates.value?.every((date: Date) => date !== null)
-  return !(validDates && price.value)
+  return !(validDates && customerName.value && bsNumber.value)
 }
 
-onMounted(() => {
-  voucherStore.fillLastVouchers()
-  voucherStore.fillVouchers()
-  console.log(vouchers)
-  console.log(lastVouchers)
+onMounted(async () => {
+  await voucherStore.fillLastVoucherNumber()
+  await voucherStore.fillLastVouchers()
 })
+
+const filteredCustomers = ref([])
+
+function searchCustomers(event) {
+  const query = event.query.toLowerCase()
+  filteredCustomers.value = oldCustomersNames.value.filter((customer) =>
+    customer.toLowerCase().startsWith(query)
+  )
+}
 </script>
 
 <template lang="pug">
@@ -48,13 +56,21 @@ Card
           ToggleButton.friendly-button(v-model="friendly" onLabel="A" offLabel="BS" size="large" :tabindex="-1")
 
           FloatLabel(variant="in")
-            InputNumber(id="room" v-model="room" :fluid="true" :tabindex="-1" )
-            label(for="room" ) Room
+            InputNumber(id="roomNumber" v-model="roomNumber" :fluid="true" :tabindex="-1" )
+            label(for="roomNumber" ) Room
 
         div.form-row
           FloatLabel(variant="in")
-            InputText(id="name" v-model="name" :fluid="true" :autofocus="true")
-            label(for="name" ) Name
+            AutoComplete(
+              v-model="customerName"
+              :suggestions="filteredCustomers"
+              :autofocus="true"
+              :forceSelection="false"
+              id="customerName"
+              @complete="searchCustomers"
+            ).large-field
+
+            label(for="customerName" ) Customer Name
 
         div.form-row
           FloatLabel(variant="in")
@@ -66,8 +82,15 @@ Card
             label(for="beds" ) Beds
 
 
-      DatePicker(v-model='dates' selection-mode='range' :manualinput='false' :number-of-months="2" :inline="true"
-        :show-other-months="true" :select-other-months="true")
+      DatePicker(
+        v-model='dates'
+        selection-mode="range"
+        :manual-input='false'
+        :number-of-months="2"
+        :inline="true"
+        :show-other-months="true"
+        :select-other-months="true"
+        )
 
       div.actions
         Button(label="Submit" @click="voucherStore.addVoucher()" :loading="voucherLoading" :disabled="disableButton()")
@@ -85,5 +108,13 @@ div.p-card.p-component {
 .actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.large-field {
+  width: 100%;
+
+  & input {
+    width: 100%;
+  }
 }
 </style>

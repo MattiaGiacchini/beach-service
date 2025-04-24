@@ -1,19 +1,30 @@
 import { computed, type Ref, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Price, PriceCreationRequest } from '@/types/Prices'
+import type { Price } from '@/types/Prices'
 import type { AxiosResponse } from 'axios'
-import { createPrice, getPrices, updatePrice } from '@/service/PriceService'
-import { getVouchers } from '@/service/VoucherService'
+import { updatePrice } from '@/service/PriceService'
+import {
+  createVoucher,
+  createVoucherPeriodsDetails,
+  getLastVoucherNumber,
+  getLastVouchers,
+  getOldCustomersNames
+} from '@/service/VoucherService'
 import type { BeachService } from '@/types/BeachService'
+import type { Voucher, VoucherCreation } from '@/types/Voucher'
+import { useTimeUtils } from '@/composables/timeUtils'
+import { useToastMessage } from '@/composables/toastMessage'
+import { usePricesStore } from '@/stores/prices'
+import { supabase } from '@/composables/supabase'
 
 export const useVoucherStore = defineStore('voucher', () => {
   const voucherLoading: Ref<boolean> = ref(false)
 
   const bsNumber: Ref<number> = ref(0)
-  const name: Ref<string> = ref('')
+  const customerName: Ref<string> = ref('')
   const umbrellas: Ref<number> = ref(0)
   const beds: Ref<number> = ref(0)
-  const room: Ref<number | undefined> = ref(undefined)
+  const roomNumber: Ref<number | undefined> = ref(undefined)
   const friendly: Ref<boolean> = ref(false)
 
   const dates = ref()
@@ -23,31 +34,54 @@ export const useVoucherStore = defineStore('voucher', () => {
 
   const vouchers: Ref<BeachService> = ref([])
   const lastVouchers: Ref<BeachService> = ref([])
+  const lastVoucherNumber = ref()
+
+  const oldCustomersNames: Ref<string[]> = ref([])
+
+  const { formatDateToYMD } = useTimeUtils()
 
   function $reset() {
     bsNumber.value = 0
-    name.value = ""
+    customerName.value = ''
     umbrellas.value = 0
     beds.value = 0
-    room.value = undefined
+    roomNumber.value = undefined
     friendly.value = false
     dates.value = null
   }
 
   async function fillVouchers() {
-    await fetchVouchers('desc', undefined, vouchers);
+    //
   }
 
-  async function fillLastVouchers(limit?: number) {
-    await fetchVouchers('asc', limit, lastVouchers);
-  }
-  async function fetchVouchers(sortingOrder: 'asc' | 'desc' = 'desc', limit?: number, targetVariable: any) {
+  async function fillLastVouchers(limit: number = 10) {
     voucherLoading.value = true
 
-    const response: AxiosResponse = await getVouchers(sortingOrder, limit)
+    const response: AxiosResponse<Price[]> = await getLastVouchers(limit)
+    if (response) {
+      lastVouchers.value = response
+    }
 
-    if (response.data) {
-      targetVariable.value = response.data;
+    voucherLoading.value = false
+  }
+
+  async function fillLastVoucherNumber() {
+    voucherLoading.value = true
+
+    const response: number = await getLastVoucherNumber()
+    if (response) {
+      bsNumber.value = response + 1
+    }
+
+    voucherLoading.value = false
+  }
+  async function fillOldCustomersNames() {
+    voucherLoading.value = true
+
+    const response: { customerName: string }[] = await getOldCustomersNames()
+
+    if (response) {
+      oldCustomersNames.value = [...new Set(response.map((customer) => customer.customerName))]
     }
 
     voucherLoading.value = false
@@ -56,18 +90,40 @@ export const useVoucherStore = defineStore('voucher', () => {
   async function addVoucher() {
     voucherLoading.value = true
 
-    const priceCreation: PriceCreationRequest = {
-      ...(name && { name: name.value }),
-      price: price.value,
-      startDate: startDate.value,
-      endDate: endDate.value,
-      year: new Date(startDate.value).getFullYear()
+    const voucherCreation: VoucherCreation = {
+      ...(roomNumber.value && { roomNumber: roomNumber.value }),
+      checkIn: formatDateToYMD(checkIn.value),
+      checkOut: formatDateToYMD(checkOut.value),
+      bsNumber: bsNumber.value,
+      customerName: customerName.value,
+      umbrellas: umbrellas.value,
+      beds: beds.value,
+      friendly: friendly.value,
+      ...(umbrellas.value === 0 && beds.value === 0 && { voucherStatus: 'cancelled' })
     }
 
-    const response: AxiosResponse = await createPrice(priceCreation)
-    if (response.data) {
-      prices.value = response.data
+    const response: Voucher = await createVoucher(voucherCreation)
+    if (response) {
+      if (usePricesStore().prices.length < 1) {
+        await usePricesStore().fillPrices()
+      }
+
+      const bedsVariation = getBedsVariation(response.umbrellas, response.beds)
+      const umbrellasVariation = response.umbrellas
+
+      const splits = splitPeriods(
+        response,
+        usePricesStore().prices,
+        bedsVariation,
+        umbrellasVariation
+      )
+      if (splits.length) {
+        await createVoucherPeriodsDetails(splits)
+      }
+
       $reset()
+      await fillLastVouchers()
+      await fillLastVoucherNumber()
     }
 
     voucherLoading.value = false
@@ -84,21 +140,101 @@ export const useVoucherStore = defineStore('voucher', () => {
     voucherLoading.value = false
   }
 
+  function splitPeriods(voucher, pricingPeriods, bedsVariation, umbrellasVariation) {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000
+    return pricingPeriods.flatMap((pricingPeriod) => {
+      const overlapStartDate = new Date(
+        Math.max(new Date(pricingPeriod.startDate).getTime(), new Date(voucher.checkIn).getTime())
+      )
+      const overlapEndDate = new Date(
+        Math.min(new Date(pricingPeriod.endDate).getTime(), new Date(voucher.checkOut).getTime())
+      )
+      if (overlapStartDate <= overlapEndDate) {
+        const daysCount =
+          (overlapEndDate.getTime() - overlapStartDate.getTime()) / millisecondsPerDay + 1
+
+        return [
+          {
+            voucherId: voucher.id,
+            priceId: pricingPeriod.id,
+            days: daysCount,
+            bedsVariation,
+            umbrellasVariation
+          }
+        ]
+      }
+      return []
+    })
+  }
+
+  function getBedsVariation(umbrellas, beds) {
+    return (beds - 2 * umbrellas) * 0.2
+  }
+
+  //
+  async function fixNextBatch() {
+    const { data: missingVouchers, error } = await supabase
+      .from('vouchers_without_pricing_details')
+      .select('*')
+      .order('checkIn')
+      .limit(100)
+
+    if (error || !missingVouchers?.length) {
+      console.log('Nothing to fix or error:', error)
+      return
+    }
+
+    if (usePricesStore().prices.length < 1) {
+      await usePricesStore().fillPrices()
+    }
+
+    const allSplits = []
+
+    for (const voucher of missingVouchers) {
+      const bedsVariation = getBedsVariation(voucher.umbrellas, voucher.beds)
+      const umbrellasVariation = voucher.umbrellas
+
+      const splits = splitPeriods(
+        voucher,
+        usePricesStore().prices,
+        bedsVariation,
+        umbrellasVariation
+      )
+
+      if (splits.length) {
+        console.log(voucher.customerName, voucher.bsNumber, voucher.umbrellas, voucher.beds, splits)
+        allSplits.push(...splits)
+      } else {
+        console.warn(`No splits for voucher ${voucher.id}`)
+      }
+    }
+
+    if (allSplits.length) {
+      await createVoucherPeriodsDetails(allSplits)
+      console.log(`Inserted ${allSplits.length} pricing details`, allSplits)
+    } else {
+      console.log('No pricing details to insert')
+    }
+  }
+
   return {
     bsNumber,
-    name,
+    customerName,
     umbrellas,
     beds,
-    room,
+    roomNumber,
     friendly,
     dates,
     voucherLoading,
     addVoucher,
     fillVouchers,
     fillLastVouchers,
+    fillLastVoucherNumber,
+    lastVoucherNumber,
     vouchers,
-    lastVouchers
+    lastVouchers,
+    fillOldCustomersNames,
+    oldCustomersNames,
+    fixNextBatch
   }
-
-
 })

@@ -7,11 +7,14 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AutoComplete: typeof import('primevue/autocomplete')['default']
     Avatar: typeof import('primevue/avatar')['default']
     BeachServiceForm: typeof import('./src/components/BeachServiceForm.vue')['default']
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('primevue/calendar')['default']
     Card: typeof import('primevue/card')['default']
+    ChartCard: typeof import('./src/components/chart/ChartCard.vue')['default']
+    ChartCart: typeof import('./src/components/chart/ChartCart.vue')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
     Column: typeof import('primevue/column')['default']
     ColumnGroup: typeof import('primevue/columngroup')['default']
@@ -30,6 +33,7 @@ declare module 'vue' {
     Password: typeof import('primevue/password')['default']
     PricesForm: typeof import('./src/components/prices/PricesForm.vue')['default']
     PricesList: typeof import('./src/components/prices/PricesList.vue')['default']
+    ProgressSpinner: typeof import('primevue/progressspinner')['default']
     ReportTable: typeof import('./src/components/report/ReportTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

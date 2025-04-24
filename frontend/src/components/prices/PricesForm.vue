@@ -33,8 +33,15 @@ Card
           :fluid="true")
           label(for="price") Price
 
-      DatePicker(v-model='dates' selection-mode='range' :manualinput='false' :number-of-months="2" :inline="true"
-        :show-other-months="true" :select-other-months="true")
+      DatePicker(
+        v-model='dates'
+        selection-mode='range'
+        :manualinput='false'
+        :number-of-months="2"
+        :inline="true"
+        :show-other-months="true"
+        :select-other-months="true"
+      )
 
       div.actions
         Button(label="Submit" @click="pricesStore.addPrice()" :loading="pricesLoading" :disabled="disableButton()")

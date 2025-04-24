@@ -12,28 +12,15 @@ export const useReportStore = defineStore('report', () => {
   async function fillReport() {
     reportLoading.value = true
 
-    const reportResponse: AxiosResponse<object[]> = await getReport()
-
-    if (reportResponse) {
-      report.value = reportResponse
-    }
-
-    const revenueResponse: AxiosResponse<object[]> = await getTotalRevenue()
-
-    if (revenueResponse) {
-      totalRevenue.value = revenueResponse
-    }
-
-    reportLoading.value = false
-  }
-
-  async function fillTotalRevenue() {
-    reportLoading.value = true
-
-    const response: AxiosResponse<object[]> = await getTotalRevenue()
+    const response: AxiosResponse<object[]> = await getReport()
 
     if (response) {
-      totalRevenue.value = response
+      report.value = response
+
+      totalRevenue.value = report.value.reduce(
+        (sum, { totalVoucherValue }) => sum + totalVoucherValue,
+        0
+      )
     }
 
     reportLoading.value = false
@@ -43,7 +30,6 @@ export const useReportStore = defineStore('report', () => {
     report,
     fillReport,
     reportLoading,
-    fillTotalRevenue,
     totalRevenue
   }
 })
