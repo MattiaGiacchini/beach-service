@@ -1,7 +1,7 @@
 import { supabase } from '@/composables/supabase'
 import type { Voucher, VoucherCreation, VoucherPeriodDetails } from '@/types/Voucher'
 import { useToastMessage } from '@/composables/toastMessage'
-const { showErrorToast } = useToastMessage()
+const { showErrorToast, showSuccessToast } = useToastMessage()
 
 async function getLastVouchers(limit = 10): Promise<Voucher[] | null> {
   try {
@@ -96,11 +96,37 @@ async function getOldCustomersNames() {
   }
 }
 
+async function reviewVoucher(
+  mode: 'approve' | 'reject',
+  voucherId: string,
+  rejectionMessage?: string
+) {
+  const updateData: { voucherStatus: string; rejectionMessage: string | null } = {
+    voucherStatus: mode === 'approve' ? 'pendingPayment' : 'rejected',
+    rejectionMessage: mode === 'reject' ? rejectionMessage || '' : null
+  }
+
+  const { data, error } = await supabase
+    .from('vouchers')
+    .update(updateData)
+    .eq('id', voucherId)
+    .select()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  showSuccessToast(`Voucher ${mode === 'approve' ? 'approved' : 'rejected'} successfully`)
+
+  return data[0]
+}
+
 export {
   getLastVoucherNumber,
   getVoucherById,
   getLastVouchers,
   createVoucher,
   createVoucherPeriodsDetails,
-  getOldCustomersNames
+  getOldCustomersNames,
+  reviewVoucher
 }

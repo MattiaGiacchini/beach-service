@@ -9,6 +9,7 @@ import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
 import ToastService from 'primevue/toastservice'
 import DialogService from 'primevue/dialogservice'
+import { toastBus } from '@/plugins/toastBus'
 
 const AuraPreset = definePreset(Aura, {
   semantic: {

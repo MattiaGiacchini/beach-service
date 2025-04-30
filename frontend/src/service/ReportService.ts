@@ -1,20 +1,31 @@
 import { supabase } from '@/composables/supabase'
 import { useToastMessage } from '@/composables/toastMessage'
+import type { VoucherStatus } from '@/types/VoucherStatus'
+import { useTimeUtils } from '@/composables/timeUtils'
 
 const { showErrorToast } = useToastMessage()
 
 async function getReport(
-  startDate: string = `${new Date().getFullYear() - 1}-01-01`,
-  endDate: string = `${new Date().getFullYear() - 1}-12-31`,
-  friendly: boolean = false
+  startDate: string,
+  endDate: string,
+  friendly: boolean = false,
+  voucherStatuses?: VoucherStatus[]
 ): Promise<object[]> {
   try {
-    const { data, error } = await supabase
-      .from('report')
-      .select('*')
-      .lt('checkOut', endDate)
-      .gt('checkIn', startDate)
-      .is('friendly', friendly)
+    // const { data, error } = await supabase
+    //   .from('report')
+    //   .select('*')
+    //   .lt('checkOut', endDate)
+    //   .gt('checkIn', startDate)
+    //   .is('friendly', friendly)
+    //   .in('voucherStatus', voucherStatuses)
+
+    const { data, error } = await supabase.rpc('report', {
+      start_date: startDate,
+      end_date: endDate,
+      is_friendly: friendly,
+      status_list: voucherStatuses
+    })
 
     if (error) throw error
 

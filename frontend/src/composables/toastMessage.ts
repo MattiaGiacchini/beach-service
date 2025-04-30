@@ -1,25 +1,33 @@
-import { inject } from 'vue'
+import type { ToastPayload } from '@/plugins/toastBus'
+import { toastBus } from '@/plugins/toastBus'
 
 export function useToastMessage() {
-  const toast = inject('toast')
-
   function showToast(
-    severity: 'success' | 'info' | 'warn' | 'error',
+    severity: ToastPayload['severity'],
     summary: string,
     detail: string,
     life: number = 3000
   ): void {
-    toast?.add({
-      severity,
-      summary,
-      detail,
-      life
-    })
+    toastBus.emit('toast', { severity, summary, detail, life })
   }
 
   const showErrorToast = (error: any) => {
-    toast?.add({ severity: 'error', summary: 'Error', detail: error.message || 'Error inesperado' })
+    const payload: ToastPayload = {
+      severity: 'error',
+      summary: 'Error',
+      detail: error?.message || 'Unexpected error'
+    }
+    toastBus.emit('toast', payload)
   }
 
-  return { showToast, showErrorToast }
+  const showSuccessToast = (message: string) => {
+    const payload: ToastPayload = {
+      severity: 'success',
+      summary: 'Success',
+      detail: message || 'OK'
+    }
+    toastBus.emit('toast', payload)
+  }
+
+  return { showToast, showErrorToast, showSuccessToast }
 }

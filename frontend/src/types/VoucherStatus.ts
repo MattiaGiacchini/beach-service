@@ -57,3 +57,13 @@ export const VoucherStatuses = [
   { text: 'closed' },
   { text: 'pendingPayment' }
 ]
+
+export type VoucherStatus =
+  | 'draft'
+  | 'readyForApproval'
+  | 'approved'
+  | 'cancelled'
+  | 'paid'
+  | 'rejected'
+  | 'closed'
+  | 'pendingPayment'

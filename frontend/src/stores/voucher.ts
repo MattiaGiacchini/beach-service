@@ -8,7 +8,8 @@ import {
   createVoucherPeriodsDetails,
   getLastVoucherNumber,
   getLastVouchers,
-  getOldCustomersNames
+  getOldCustomersNames,
+  reviewVoucher
 } from '@/service/VoucherService'
 import type { BeachService } from '@/types/BeachService'
 import type { Voucher, VoucherCreation } from '@/types/Voucher'
@@ -16,6 +17,9 @@ import { useTimeUtils } from '@/composables/timeUtils'
 import { useToastMessage } from '@/composables/toastMessage'
 import { usePricesStore } from '@/stores/prices'
 import { supabase } from '@/composables/supabase'
+import { useReportStore } from '@/stores/report'
+
+const { showSuccessToast } = useToastMessage()
 
 export const useVoucherStore = defineStore('voucher', () => {
   const voucherLoading: Ref<boolean> = ref(false)
@@ -217,6 +221,23 @@ export const useVoucherStore = defineStore('voucher', () => {
     }
   }
 
+  async function updateVoucherStatus(
+    mode: 'approve' | 'reject',
+    voucherId: string,
+    rejectionMessage?: string
+  ) {
+    voucherLoading.value = true
+
+    const response = await reviewVoucher(mode, voucherId, rejectionMessage)
+    if (response) {
+      console.log(response)
+      const reportStore = useReportStore()
+      reportStore.report = reportStore.report.filter((voucher) => voucher.id !== response.id)
+    }
+
+    voucherLoading.value = false
+  }
+
   return {
     bsNumber,
     customerName,
@@ -235,6 +256,7 @@ export const useVoucherStore = defineStore('voucher', () => {
     lastVouchers,
     fillOldCustomersNames,
     oldCustomersNames,
-    fixNextBatch
+    fixNextBatch,
+    updateVoucherStatus
   }
 })

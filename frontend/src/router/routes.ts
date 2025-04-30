@@ -4,6 +4,7 @@ import ReportView from '@/views/ReportView.vue'
 import PricesView from '@/views/PricesView.vue'
 import VoucherView from '@/views/VoucherView.vue'
 import ChartView from '@/views/ChartView.vue'
+import ReviewView from '@/views/ReviewView.vue'
 
 export const routes = [
   {
@@ -33,6 +34,16 @@ export const routes = [
     meta: {
       title: 'Report',
       icon: 'pi pi-chart-line',
+      showInMenu: true
+    }
+  },
+  {
+    path: '/review',
+    name: 'review',
+    component: ReviewView,
+    meta: {
+      title: 'Review',
+      icon: 'pi pi-verified',
       showInMenu: true
     }
   },
