@@ -115,7 +115,7 @@ div.list-container
             Select(v-model="data.voucherStatus" editable :options="VoucherStatuses" optionLabel="text"
               placeholder="Status")
 
-        ColumnGroup(type="footer" :frozen="true")
+        ColumnGroup(type="footer" :frozen="true" v-if="!review")
           Row(:frozen="true")
             Column(footer="Totals:" :colspan="11" ).right-text
             Column(:footer="formatCurrency(totalRevenue)").right-text

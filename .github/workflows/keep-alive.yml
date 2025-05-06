@@ -1,17 +1,64 @@
-name: Ping Supabase
+name: Ping Supabase Frequently
 
 on:
   schedule:
-    - cron: '10 10 * * MON,WED,FRI' 
+    - cron: '*/10 12-19 * * *' # Cada 10 min entre las 12:00 y las 19:00
   workflow_dispatch:
 
 jobs:
-  ping:
+  ping_all:
     runs-on: ubuntu-latest
     steps:
-      - name: Hacer ping a Supabase
+      - name: Ping vouchers (customerName)
         run: |
-          curl -X GET \
+          echo "Ping vouchers (customerName)"
+          curl -s -X GET \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            https://zysmahahdthoeyerklqt.supabase.co/rest/v1/prices
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/vouchers?select=customerName&order=customerName.asc&offset=0&limit=10001"
+
+      - name: Sleep random 10-20 sec
+        run: sleep $((10 + RANDOM % 11))
+
+      - name: Ping report
+        run: |
+          echo "Ping report"
+          curl -s -X POST \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/rpc/report"
+
+      - name: Sleep random 10-20 sec
+        run: sleep $((10 + RANDOM % 11))
+
+      - name: Ping prices
+        run: |
+          echo "Ping prices"
+          curl -s -X GET \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/prices?select=*&order=year.desc%2CstartDate.asc"
+
+      - name: Ping vouchers latest bsNumber
+        run: |
+          echo "Ping latest bsNumber"
+          curl -s -X GET \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/vouchers?select=bsNumber&order=created_at.desc&limit=1"
+
+      - name: Ping monthly revenue
+        run: |
+          echo "Ping monthly revenue"
+          curl -s -X GET \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/monthlyRevenue?select=*"
+
+      - name: Ping yearly stats
+        run: |
+          echo "Ping yearly stats"
+          curl -s -X GET \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "https://zysmahahdthoeyerklqt.supabase.co/rest/v1/yearlyStats?select=*"
