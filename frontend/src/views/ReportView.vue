@@ -9,8 +9,8 @@ const { startDateFilter, endDateFilter } = storeToRefs(reportStore)
 
 onMounted(() => {
   reportStore.$reset()
-  startDateFilter.value = `${new Date().getFullYear() - 1}-01-01`
-  endDateFilter.value = `${new Date().getFullYear() - 1}-12-31`
+  startDateFilter.value = `${new Date().getFullYear()}-01-01`
+  endDateFilter.value = `${new Date().getFullYear()}-12-31`
   reportStore.fillReport()
 })
 </script>
