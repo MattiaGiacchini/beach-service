@@ -12,7 +12,7 @@ const { friendlyFilter, statusFilter } = storeToRefs(reportStore)
 
 onMounted(() => {
   reportStore.$reset()
-  statusFilter.value = ['draft']
+  statusFilter.value = ['readyForApproval']
   reportStore.fillReport()
 })
 
@@ -21,7 +21,7 @@ async function approveVoucher(id) {
 }
 
 function rejectVoucher(id, message) {
-  voucherStore.updateVoucherStatus('reject', id, 'the checkin is wrong')
+  voucherStore.updateVoucherStatus('reject', id, message)
 }
 </script>
 

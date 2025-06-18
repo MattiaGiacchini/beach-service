@@ -28,9 +28,18 @@ Card
         FloatLabel(variant="in")
           label(for="name" ) Name
           InputText(id="name" v-model="name" :fluid="true")
+
         FloatLabel(variant="in")
-          InputNumber(v-model='price' id="price" :step='0.5' :min='0' mode='currency' currency='EUR' autofocus
-          :fluid="true")
+          InputNumber(
+            v-model='price'
+            id="price"
+            :step='0.5'
+            :min='0'
+            mode='currency'
+            currency='EUR'
+            autofocus
+            :fluid="true"
+          )
           label(for="price") Price
 
       DatePicker(

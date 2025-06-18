@@ -4,8 +4,9 @@ import { useReportStore } from '@/stores/report'
 import { VoucherStatus, VoucherStatuses } from '@/types/VoucherStatus'
 import Select from 'primevue/select'
 import { useTimeUtils } from '@/composables/timeUtils'
-import { onMounted, ref } from 'vue'
+import { onMounted, type Ref, ref } from 'vue'
 import { useCurrencyUtils } from '@/composables/currencyUtils'
+import FloatLabel from 'primevue/floatlabel'
 
 const props = withDefaults(
   defineProps<{
@@ -16,8 +17,9 @@ const props = withDefaults(
   }
 )
 
-const reportStore = useReportStore()
+const emit = defineEmits(['approveVoucher', 'rejectVoucher'])
 
+const reportStore = useReportStore()
 const { reportLoading, report, totalRevenue } = storeToRefs(reportStore)
 
 const { localizedShortDateTime } = useTimeUtils()
@@ -27,7 +29,27 @@ function refresh() {
   reportStore.fillReport()
 }
 
-defineEmits(['approveVoucher', 'rejectVoucher'])
+function print() {
+  window.print()
+}
+
+const isRejectDialogVisible: Ref<boolean> = ref(false)
+const rejectMessage: Ref<string> = ref('')
+const rejectVoucherId: Ref<string> = ref('')
+const rejectMessageTouched = ref(false)
+
+function handleDisplayRejectModal(id: string) {
+  console.log(id)
+  rejectVoucherId.value = id
+  isRejectDialogVisible.value = true
+  rejectMessageTouched.value = false
+}
+
+function handleReject() {
+  emit('rejectVoucher', rejectVoucherId.value, rejectMessage.value)
+  isRejectDialogVisible.value = false
+  rejectMessageTouched.value = false
+}
 </script>
 
 <template lang="pug">
@@ -43,7 +65,7 @@ div.list-container
         p {{ review ? "Review" : "Report" }}
         div.commands-buttons(v-if="!review")
           Button(icon="pi pi-sync" severity="secondary" rounded variant="outlined" @click="refresh")
-          Button(icon="pi pi-download" severity="secondary" rounded variant="outlined" @click="refresh")
+          Button(icon="pi pi-print" severity="secondary" rounded variant="outlined" @click="print")
 
     template(#content).list
       DataTable(
@@ -104,7 +126,9 @@ div.list-container
               Button(icon="pi pi-check" severity="success" rounded variant="outlined"
                 @click="$emit('approveVoucher', slotProps.data.id)")
               Button(icon="pi pi-times" severity="danger" rounded variant="outlined"
-                @click="$emit('rejectVoucher', slotProps.data.id)")
+                @click="handleDisplayRejectModal(slotProps.data.id)")
+
+
 
         Column(field="voucherStatus" v-else).center-text
           template(#body="slotProps")
@@ -121,9 +145,62 @@ div.list-container
             Column(:footer="formatCurrency(totalRevenue)").right-text
             Column(footer="")
 
+  Dialog(
+    v-model:visible="isRejectDialogVisible"
+    modal
+    header="Voucher correction request"
+  ).reject-voucher-dialog
+    div.reject-voucher-layout
+      div
+      span Please describe the issue with this voucher
+      div.reject-voucher-error-message
+        FloatLabel(variant="in")
+          Textarea(
+            v-model="rejectMessage"
+            id="rejectMessage"
+            autocomplete="off"
+            rows="5"
+            class="w-full"
+            :class="{ 'p-invalid': rejectMessageTouched && rejectMessage.length < 5 }"
+            @blur="rejectMessageTouched = true"
+            placeholder="Esempi: \n - Checkout: 15/06/2025\n - Lettini: 2 \n - ..."
+            autofocus
+            :fluid="true"
+          )
+          label(for="rejectMessage") Correction details
+
+          Message(
+            v-if="rejectMessageTouched && rejectMessage.length < 10"
+            severity="error"
+            size="small"
+            variant="simple"
+          ) Your message must be at least 10 characters long
+
+      div.reject-voucher-buttons
+        Button(type="button" label="Cancel" severity="secondary" @click="isRejectDialogVisible = false")
+        Button(type="button" label="Reject" @click="handleReject" :disabled="rejectMessage.length < 10")
+
+
 </template>
 
 <style lang="scss">
+.reject-voucher-dialog {
+  width: 500px;
+}
+
+.reject-voucher-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: end;
+}
+
+.reject-voucher-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .table-commands {
   display: flex;
   flex-direction: row;
@@ -245,6 +322,7 @@ td:has(.price-details-wrapper) {
 @media print {
   body * {
     visibility: hidden !important;
+    color: var(--p-datatable-row-color);
   }
 
   .p-card-body {
@@ -384,6 +462,16 @@ td:has(.price-details-wrapper) {
 
   .price-detail-row {
     grid-template-columns: 20% 20% 20% 20% 20% !important;
+  }
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 }
 </style>
