@@ -1,6 +1,6 @@
 # beach-service
 
-This template should help get you started developing with Vue 3 in Vite.
+This application allows you to create and manage data for beach reservation for customer with conventions.
 
 ## Recommended IDE Setup
 
