@@ -81,3 +81,29 @@ text-align: end;
   }
 }
 
+
+
+/* === Global Print Styles === */
+@media print {
+  /* Hide navigation menu */
+  .p-menubar {
+    display: none !important;
+  }
+
+  /* Reset app shell fixed heights so content flows naturally */
+  .layout,
+  .q {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Prevent background fill beyond content */
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+  }
+}

@@ -49,6 +49,10 @@ function onYearChange(newYear: number | null) {
   reportStore.endDateFilter = `${newYear}-12-31`
   reportStore.fillReport()
 }
+
+function printReport() {
+  window.print()
+}
 </script>
 
 <template lang="pug">
@@ -93,7 +97,7 @@ div.filter-bar
 
   div.filter-actions
     Button(icon="pi pi-sync" severity="secondary" rounded variant="outlined" :loading="reportStore.reportLoading" @click="reportStore.fillReport()")
-    Button(icon="pi pi-print" severity="secondary" rounded variant="outlined" @click="() => window.print()")
+    Button(icon="pi pi-print" severity="secondary" rounded variant="outlined" @click="printReport")
 </template>
 
 <style lang="scss">

@@ -356,7 +356,6 @@ td:has(.price-details-wrapper) {
   }
 
   .p-button,
-  div.p-card-title,
   div.p-card-header *,
   div.p-card-footer * {
     display: none !important;
@@ -365,6 +364,13 @@ td:has(.price-details-wrapper) {
   .list-container,
   .list-container * {
     visibility: visible !important;
+  }
+
+  /* Hide title bar (report title + filter bar) in print */
+  .list-container .p-card-caption,
+  .list-container .p-card-caption * {
+    visibility: hidden !important;
+    display: none !important;
   }
 
   .list-container .p-card {
@@ -378,15 +384,11 @@ td:has(.price-details-wrapper) {
   }
 
   .list-container {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100% !important;
     height: auto !important;
     min-height: auto !important;
     max-height: none !important;
     overflow: visible !important;
-    table-layout: fixed; // Para que respeten los widths
   }
 
   table {
