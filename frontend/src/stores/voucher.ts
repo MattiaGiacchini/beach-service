@@ -133,6 +133,8 @@ export const useVoucherStore = defineStore('voucher', () => {
     voucherLoading.value = false
   }
 
+  async function updateVoucher() {}
+
   async function modifyPrice(newPrice: Price) {
     voucherLoading.value = true
 
@@ -175,7 +177,6 @@ export const useVoucherStore = defineStore('voucher', () => {
     return (beds - 2 * umbrellas) * 0.2
   }
 
-  //
   async function fixNextBatch() {
     const { data: missingVouchers, error } = await supabase
       .from('vouchers_without_pricing_details')

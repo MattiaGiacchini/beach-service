@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useVoucherStore } from '@/stores/voucher'
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import FloatLabel from 'primevue/floatlabel'
 import DatePicker from 'primevue/datepicker'
 import InputNumber from 'primevue/inputnumber'
@@ -40,6 +40,24 @@ function searchCustomers(event) {
     customer.toLowerCase().startsWith(query)
   )
 }
+
+const autoCompleteRef = ref()
+
+const closePanel = () => {
+  nextTick(() => {
+    setTimeout(() => {
+      autoCompleteRef.value?.hide()
+    }, 150)
+  })
+}
+
+const onSubmit = () => {
+  voucherStore.addVoucher()
+
+  nextTick(() => {
+    autoCompleteRef.value?.$el.querySelector('input')?.focus()
+  })
+}
 </script>
 
 <template lang="pug">
@@ -62,12 +80,14 @@ Card
         div.form-row
           FloatLabel(variant="in")
             AutoComplete(
+              ref="autoCompleteRef"
               v-model="customerName"
               :suggestions="filteredCustomers"
-              :autofocus="true"
+              autofocus
               :forceSelection="false"
               id="customerName"
               @complete="searchCustomers"
+              @blur="closePanel"
             ).large-field
 
             label(for="customerName" ) Customer Name
@@ -93,7 +113,7 @@ Card
         )
 
       div.actions
-        Button(label="Submit" @click="voucherStore.addVoucher()" :loading="voucherLoading" :disabled="disableButton()")
+        Button(label="Submit" @click="onSubmit" :loading="voucherLoading" :disabled="disableButton()")
 </template>
 
 <style lang="scss">

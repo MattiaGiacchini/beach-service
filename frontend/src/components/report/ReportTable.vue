@@ -4,13 +4,15 @@ import { useReportStore } from '@/stores/report'
 import { VoucherStatus, VoucherStatuses } from '@/types/VoucherStatus'
 import Select from 'primevue/select'
 import { useTimeUtils } from '@/composables/timeUtils'
-import { onMounted, type Ref, ref } from 'vue'
+import { type Ref, ref } from 'vue'
 import { useCurrencyUtils } from '@/composables/currencyUtils'
 import FloatLabel from 'primevue/floatlabel'
 
 const props = withDefaults(
   defineProps<{
     review?: boolean
+    report: object[]
+    totalRevenue: number
   }>(),
   {
     review: false
@@ -20,7 +22,7 @@ const props = withDefaults(
 const emit = defineEmits(['approveVoucher', 'rejectVoucher'])
 
 const reportStore = useReportStore()
-const { reportLoading, report, totalRevenue } = storeToRefs(reportStore)
+const { reportLoading } = storeToRefs(reportStore)
 
 const { localizedShortDateTime } = useTimeUtils()
 const { formatCurrency } = useCurrencyUtils()
@@ -50,6 +52,7 @@ function handleReject() {
   isRejectDialogVisible.value = false
   rejectMessageTouched.value = false
 }
+
 </script>
 
 <template lang="pug">
@@ -62,10 +65,8 @@ div.list-container
   Card()
     template(#title)
       div.table-commands
-        p {{ review ? "Review" : "Report" }}
-        div.commands-buttons(v-if="!review")
-          Button(icon="pi pi-sync" severity="secondary" rounded variant="outlined" @click="refresh")
-          Button(icon="pi pi-print" severity="secondary" rounded variant="outlined" @click="print")
+        p.card-title-text {{ review ? "Review" : "Report" }}
+        slot(name="title")
 
     template(#content).list
       DataTable(
@@ -144,6 +145,18 @@ div.list-container
             Column(footer="Totals:" :colspan="11" ).right-text
             Column(:footer="formatCurrency(totalRevenue)").right-text
             Column(footer="")
+          //Row(:frozen="true")
+          //  Column(footer="Tax base:" :colspan="11" ).right-text
+          //  Column(:footer="formatCurrency(totalRevenue/1.22)").right-text
+          //  Column(footer="")
+          //Row(:frozen="true")
+          //  Column(footer="Extra:" :colspan="11" ).right-text
+          //  Column(:footer="formatCurrency(100)").right-text
+          //  Column(footer="")
+          //Row(:frozen="true")
+          //  Column(footer="Final Totals:" :colspan="11" ).right-text
+          //  Column(:footer="formatCurrency(totalRevenue/1.22+100)").right-text
+          //  Column(footer="")
 
   Dialog(
     v-model:visible="isRejectDialogVisible"
@@ -205,6 +218,13 @@ div.list-container
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.card-title-text {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .commands-buttons,
 .review-buttons {
@@ -219,6 +239,12 @@ div.list-container
   div.p-card.p-component,
   div.p-card-body {
     height: 100%;
+
+    div.p-card-title {
+      display: flex !important;
+      width: 100%;
+      align-items: center;
+    }
 
     div.p-card-content {
       height: calc(100% - 33.59px);

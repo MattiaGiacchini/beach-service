@@ -1,4 +1,4 @@
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, toRaw } from 'vue'
 import { defineStore } from 'pinia'
 import type { AxiosResponse } from 'axios'
 import { getReport } from '@/service/ReportService'
@@ -20,11 +20,15 @@ export const useReportStore = defineStore('report', () => {
   async function fillReport() {
     reportLoading.value = true
 
+    const statusList = normalizeArrayToUndefined([...toRaw(statusFilter.value)]) ?? null
+
     const response: AxiosResponse<object[]> = await getReport(
       startDateFilter.value,
       endDateFilter.value,
       friendlyFilter.value,
-      normalizeArrayToUndefined(statusFilter.value)
+      statusList,
+      null,
+      null
     )
 
     if (response) {

@@ -9,22 +9,18 @@ async function getReport(
   startDate: string,
   endDate: string,
   friendly: boolean = false,
-  voucherStatuses?: VoucherStatus[]
+  voucherStatuses?: VoucherStatus[],
+  minBsNumber?: number,
+  maxBsNumber?: number
 ): Promise<object[]> {
   try {
-    // const { data, error } = await supabase
-    //   .from('report')
-    //   .select('*')
-    //   .lt('checkOut', endDate)
-    //   .gt('checkIn', startDate)
-    //   .is('friendly', friendly)
-    //   .in('voucherStatus', voucherStatuses)
-
-    const { data, error } = await supabase.rpc('report', {
+    const { data, error } = await supabase.rpc('reportV3', {
       start_date: startDate,
       end_date: endDate,
-      is_friendly: friendly,
-      status_list: voucherStatuses
+      is_friendly: false,
+      status_list: voucherStatuses ?? null,
+      min_bs: minBsNumber ?? null,
+      max_bs: maxBsNumber ?? null
     })
 
     if (error) throw error
