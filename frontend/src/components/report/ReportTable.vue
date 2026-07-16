@@ -234,7 +234,7 @@ div.list-container
 }
 .list-container {
   flex: 1;
-  max-height: 100%;
+  height: 100%;
 
   div.p-card.p-component,
   div.p-card-body {

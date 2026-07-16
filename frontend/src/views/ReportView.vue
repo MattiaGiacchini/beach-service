@@ -64,7 +64,7 @@ main.report-layout
 
 .report-table {
   flex: 1;
+  height: 0; /* forces flex child to respect parent bounds */
   min-height: 0;
-  overflow: auto;
 }
 </style>
