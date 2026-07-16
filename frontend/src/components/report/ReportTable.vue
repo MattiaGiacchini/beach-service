@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useReportStore } from '@/stores/report'
+import { useVoucherStore } from '@/stores/voucher'
 import { VoucherStatus, VoucherStatuses } from '@/types/VoucherStatus'
 import Select from 'primevue/select'
 import { useTimeUtils } from '@/composables/timeUtils'
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, computed } from 'vue'
 import { useCurrencyUtils } from '@/composables/currencyUtils'
 import FloatLabel from 'primevue/floatlabel'
+import ContextMenu from 'primevue/contextmenu'
+import { deleteVoucher, updateVoucher, createVoucher } from '@/service/VoucherService'
+import { deleteVoucherFromReport, replaceVoucherInReport } from '@/utils/reportArrayUtils'
+import { mapVoucherToFormProps, buildCompanionVoucher } from '@/utils/voucherFormUtils'
+import { buildMenuItems } from '@/utils/voucherMenuItems'
+import type { Voucher, VoucherFormInitialValues } from '@/types/Voucher'
+import VoucherForm from '@/components/vouchers/VoucherForm.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -22,6 +30,7 @@ const props = withDefaults(
 const emit = defineEmits(['approveVoucher', 'rejectVoucher'])
 
 const reportStore = useReportStore()
+const voucherStore = useVoucherStore()
 const { reportLoading } = storeToRefs(reportStore)
 
 const { localizedShortDateTime } = useTimeUtils()
@@ -53,10 +62,110 @@ function handleReject() {
   rejectMessageTouched.value = false
 }
 
+// Context menu state
+const contextMenu: Ref<InstanceType<typeof ContextMenu> | null> = ref(null)
+const selectedVoucher: Ref<Voucher | null> = ref(null)
+const isDeleteVisible: Ref<boolean> = ref(false)
+const isEditVisible: Ref<boolean> = ref(false)
+const isConvertVisible: Ref<boolean> = ref(false)
+const actionLoading: Ref<boolean> = ref(false)
+const actionError: Ref<string | null> = ref(null)
+
+function openDelete() { actionError.value = null; isDeleteVisible.value = true }
+function openEdit() { actionError.value = null; isEditVisible.value = true }
+function openConvert() { actionError.value = null; isConvertVisible.value = true }
+
+const menuItems = computed(() =>
+  buildMenuItems(selectedVoucher.value, { openDelete, openEdit, openConvert })
+)
+
+function onRowContextMenu(event: { originalEvent: MouseEvent; data: Voucher }) {
+  selectedVoucher.value = event.data
+  contextMenu.value?.show(event.originalEvent)
+}
+
+async function handleDeleteConfirm() {
+  if (!selectedVoucher.value) return
+  actionLoading.value = true
+  actionError.value = null
+  const success = await deleteVoucher(selectedVoucher.value.id)
+  if (success) {
+    isDeleteVisible.value = false
+    await reportStore.fillReport()
+  } else {
+    actionError.value = 'Failed to delete the voucher. Please try again.'
+  }
+  actionLoading.value = false
+}
+
+async function handleEditSubmit(payload: VoucherFormInitialValues) {
+  if (!selectedVoucher.value) return
+  const oldId = selectedVoucher.value.id
+  actionLoading.value = true
+  actionError.value = null
+
+  const newVoucher = await voucherStore.recreateVoucher(oldId, {
+    bsNumber:     payload.bsNumber,
+    roomNumber:   payload.roomNumber ?? 0,
+    customerName: payload.customerName,
+    umbrellas:    payload.umbrellas,
+    beds:         payload.beds,
+    checkIn:      payload.checkIn,
+    checkOut:     payload.checkOut,
+    friendly:     payload.friendly,
+  })
+
+  if (!newVoucher) {
+    actionError.value = 'Failed to update the voucher. Please try again.'
+    actionLoading.value = false
+    return
+  }
+
+  isEditVisible.value = false
+  await reportStore.fillReport()
+  actionLoading.value = false
+}
+
+async function handleConvertConfirm() {
+  if (!selectedVoucher.value) return
+  const voucherId = selectedVoucher.value.id
+  actionLoading.value = true
+  actionError.value = null
+
+  // Step 1: Update the voucher to friendly=true
+  const updatedVoucher = await updateVoucher(voucherId, { friendly: true })
+  if (!updatedVoucher) {
+    actionError.value = 'Failed to update the voucher. No changes were made.'
+    actionLoading.value = false
+    return
+  }
+
+  // Step 2: Create the companion ANNULLATO voucher with pricing details
+  const companion = await voucherStore.createVoucherWithDetails(buildCompanionVoucher(selectedVoucher.value))
+  if (!companion) {
+    // Attempt to revert the friendly=true change
+    const reverted = await updateVoucher(voucherId, { friendly: false })
+    if (!reverted) {
+      actionError.value =
+        'Critical error: The voucher was converted but the companion could not be created and the revert also failed. Please reload the page.'
+    } else {
+      actionError.value = 'The companion voucher could not be created. The conversion was reverted.'
+    }
+    actionLoading.value = false
+    return
+  }
+
+  // Both succeeded
+  isConvertVisible.value = false
+  await reportStore.fillReport()
+  actionLoading.value = false
+}
+
 </script>
 
 <template lang="pug">
 div.list-container
+  ContextMenu(ref="contextMenu" :model="menuItems")
   Card.spinner-card(v-if="false" )
     template(#content)
       div.spinner-wrapper
@@ -77,6 +186,8 @@ div.list-container
         size="normal"
         scroll-height="flex"
         striped-rows
+        :context-menu-selection="selectedVoucher"
+        @row-contextmenu="onRowContextMenu"
       )
         ColumnGroup(type="header")
           Row
@@ -157,6 +268,30 @@ div.list-container
           //  Column(footer="Final Totals:" :colspan="11" ).right-text
           //  Column(:footer="formatCurrency(totalRevenue/1.22+100)").right-text
           //  Column(footer="")
+
+  Dialog(v-model:visible="isDeleteVisible" modal header="Delete Voucher")
+    p(v-if="selectedVoucher") Are you sure you want to delete voucher for #[span {{ selectedVoucher.customerName }}] (BS ##[span {{ selectedVoucher.bsNumber }}])?
+    Message(v-if="actionError" severity="error" size="small" variant="simple") {{ actionError }}
+    template(#footer)
+      Button(label="Cancel" severity="secondary" @click="isDeleteVisible = false" :disabled="actionLoading")
+      Button(label="Confirm" severity="danger" @click="handleDeleteConfirm" :loading="actionLoading" :disabled="actionLoading")
+
+  Dialog(v-model:visible="isEditVisible" modal header="Edit Voucher")
+    div(v-if="actionLoading" style="position:absolute;inset:0;background:rgba(255,255,255,0.5);z-index:1")
+    Message(v-if="actionError" severity="error" size="small" variant="simple") {{ actionError }}
+    VoucherForm(
+      v-if="selectedVoucher"
+      :initial-values="mapVoucherToFormProps(selectedVoucher)"
+      :friendly-disabled="true"
+      @submit="handleEditSubmit"
+    )
+
+  Dialog(v-model:visible="isConvertVisible" modal header="Convert to A")
+    p(v-if="selectedVoucher") Are you sure you want to convert this voucher to A? Customer: #[span {{ selectedVoucher.customerName }}], BS ##[span {{ selectedVoucher.bsNumber }}]
+    Message(v-if="actionError" severity="error" size="small" variant="simple") {{ actionError }}
+    template(#footer)
+      Button(label="Cancel" severity="secondary" @click="isConvertVisible = false" :disabled="actionLoading")
+      Button(label="Confirm" @click="handleConvertConfirm" :loading="actionLoading" :disabled="actionLoading")
 
   Dialog(
     v-model:visible="isRejectDialogVisible"

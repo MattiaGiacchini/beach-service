@@ -5,7 +5,7 @@ export function buildStatusSummaryLabel(selected: string[]): string {
 </script>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
@@ -26,6 +26,15 @@ const selectedStatusText = ref<string>('')
 const filteredStatuses = ref(allStatusOptions)
 const selectedYear = ref<number>(new Date().getFullYear())
 const searchQuery = ref<string>('')
+
+function onFriendlyChange(value: boolean) {
+  reportStore.friendlyFilter = value
+  reportStore.fillReport()
+}
+
+watch(() => reportStore.friendlyFilter, () => {
+  reportStore.fillReport()
+})
 
 function searchStatuses(event: { query: string }) {
   const q = event.query.toLowerCase()
@@ -85,6 +94,13 @@ div.filter-bar
       )
       label(for="yearSelect") Year
 
+  div.filter-field--friendly
+    ToggleButton.friendly-filter-button(
+      v-model="reportStore.friendlyFilter"
+      onLabel="A"
+      offLabel="BS"
+    )
+
   div.filter-field--search
     FloatLabel(variant="in")
       InputText(
@@ -115,6 +131,15 @@ div.filter-bar
 .filter-field--status { width: 190px; }
 .filter-field--year   { width: 120px; }
 .filter-field--search { width: 100%; max-width: 250px; }
+
+.filter-field--friendly {
+  flex-shrink: 0;
+  height: 46.5px;
+  .friendly-filter-button {
+    width: 80px;
+    height: 100%;
+  }
+}
 
 .filter-field--status,
 .filter-field--year,

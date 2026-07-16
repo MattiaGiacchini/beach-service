@@ -30,3 +30,14 @@ export type VoucherPeriodDetails = {
   bedsVariation: number
   days: number
 }
+
+export interface VoucherFormInitialValues {
+  bsNumber: number
+  roomNumber?: number
+  customerName: string
+  umbrellas: number
+  beds: number
+  checkIn: string   // ISO date 'YYYY-MM-DD'
+  checkOut: string  // ISO date 'YYYY-MM-DD'
+  friendly: boolean
+}

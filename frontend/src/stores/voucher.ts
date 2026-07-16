@@ -222,6 +222,50 @@ export const useVoucherStore = defineStore('voucher', () => {
     }
   }
 
+  async function createVoucherWithDetails(payload: VoucherCreation): Promise<Voucher | null> {
+    const newVoucher = await createVoucher(payload)
+    if (!newVoucher) return null
+
+    if (usePricesStore().prices.length < 1) {
+      await usePricesStore().fillPrices()
+    }
+
+    const bedsVariation = getBedsVariation(newVoucher.umbrellas, newVoucher.beds)
+    const umbrellasVariation = newVoucher.umbrellas
+    const splits = splitPeriods(newVoucher, usePricesStore().prices, bedsVariation, umbrellasVariation)
+    if (splits.length) {
+      await createVoucherPeriodsDetails(splits)
+    }
+
+    return newVoucher
+  }
+
+  async function createVoucherWithDetails(payload: VoucherCreation): Promise<Voucher | null> {
+    const newVoucher = await createVoucher(payload)
+    if (!newVoucher) return null
+
+    if (usePricesStore().prices.length < 1) {
+      await usePricesStore().fillPrices()
+    }
+
+    const bedsVariation = getBedsVariation(newVoucher.umbrellas, newVoucher.beds)
+    const umbrellasVariation = newVoucher.umbrellas
+    const splits = splitPeriods(newVoucher, usePricesStore().prices, bedsVariation, umbrellasVariation)
+    if (splits.length) {
+      await createVoucherPeriodsDetails(splits)
+    }
+
+    return newVoucher
+  }
+
+  async function recreateVoucher(oldId: string, payload: VoucherCreation): Promise<Voucher | null> {
+    const { deleteVoucher: del } = await import('@/service/VoucherService')
+    const deleted = await del(oldId)
+    if (!deleted) return null
+
+    return createVoucherWithDetails(payload)
+  }
+
   async function updateVoucherStatus(
     mode: 'approve' | 'reject',
     voucherId: string,
@@ -258,6 +302,8 @@ export const useVoucherStore = defineStore('voucher', () => {
     fillOldCustomersNames,
     oldCustomersNames,
     fixNextBatch,
+    recreateVoucher,
+    createVoucherWithDetails,
     updateVoucherStatus
   }
 })

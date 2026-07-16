@@ -121,6 +121,38 @@ async function reviewVoucher(
   return data[0]
 }
 
+async function deleteVoucher(voucherId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('vouchers').delete().eq('id', voucherId)
+    if (error) throw error
+
+    showSuccessToast('Voucher deleted successfully')
+    return true
+  } catch (error: any) {
+    showErrorToast(error)
+    return false
+  }
+}
+
+async function updateVoucher(
+  voucherId: string,
+  patch: Partial<Omit<Voucher, 'id' | 'created_at'>>
+): Promise<Voucher | null> {
+  try {
+    const { data, error } = await supabase
+      .from('vouchers')
+      .update(patch)
+      .eq('id', voucherId)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } catch (error: any) {
+    showErrorToast(error)
+    return null
+  }
+}
+
 export {
   getLastVoucherNumber,
   getVoucherById,
@@ -128,5 +160,7 @@ export {
   createVoucher,
   createVoucherPeriodsDetails,
   getOldCustomersNames,
-  reviewVoucher
+  reviewVoucher,
+  deleteVoucher,
+  updateVoucher
 }

@@ -17,7 +17,7 @@ async function getReport(
     const { data, error } = await supabase.rpc('reportV3', {
       start_date: startDate,
       end_date: endDate,
-      is_friendly: false,
+      is_friendly: friendly,
       status_list: voucherStatuses ?? null,
       min_bs: minBsNumber ?? null,
       max_bs: maxBsNumber ?? null
